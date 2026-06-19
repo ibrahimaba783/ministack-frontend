@@ -11,7 +11,7 @@ const Questions = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/questions");
+        const res = await axios.get("https://ministack-backend-stpp.onrender.com/api/questions");
         setQuestions(res.data);
       } catch (error) {
         console.log(error);

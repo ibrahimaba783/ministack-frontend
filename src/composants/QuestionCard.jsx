@@ -13,7 +13,7 @@ const QuestionCard = ({ question }) => {
         }
         try {
             await axios.put(
-                `http://localhost:3000/api/questions/${question._id}/voter`,
+                `https://ministack-backend-stpp.onrender.com/api/questions/${question._id}/voter`,
                 { type },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

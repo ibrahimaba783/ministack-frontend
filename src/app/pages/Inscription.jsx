@@ -14,7 +14,7 @@ const Inscription = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/api/auth/inscription', formData);
+           await axios.post('https://ministack-backend-stpp.onrender.com/api/auth/inscription', formData);
             alert('Inscription réussie !');
             navigate('/');
         } catch (error) {

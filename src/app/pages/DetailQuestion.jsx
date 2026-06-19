@@ -12,9 +12,10 @@ const DetailQuestion = () => {
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
-                const res = await axios.get(`http://localhost:3000/api/questions/${id}`);
+                const res = await axios.get(`https://ministack-backend-stpp.onrender.com/api/questions/${id}`);
+
                 setQuestion(res.data);
-                const rep = await axios.get(`http://localhost:3000/api/reponses/${id}`);
+                const rep = await axios.get(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`);
                 setReponses(rep.data);
             } catch (error) {
                 console.log(error);
@@ -26,7 +27,7 @@ const DetailQuestion = () => {
     const handleReponse = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`http://localhost:3000/api/reponses/${id}`, 
+            await axios.post(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`, 
                 { contenu }, 
                 { headers: { Authorization: `Bearer ${token}` } }
             );

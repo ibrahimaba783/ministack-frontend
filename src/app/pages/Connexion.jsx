@@ -18,7 +18,7 @@ const Connexion = () => {
     const data = { email, password };
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/connexion", {
+      const response = await fetch("https://ministack-backend-stpp.onrender.com/api/auth/connexion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)

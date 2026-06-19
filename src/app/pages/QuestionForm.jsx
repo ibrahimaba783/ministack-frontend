@@ -19,7 +19,7 @@ const QuestionForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/api/questions', {
+           await axios.post('https://ministack-backend-stpp.onrender.com/api/questions', {
                 ...formData,
                 tags: formData.tags.split(',').map(t => t.trim())
             }, {
