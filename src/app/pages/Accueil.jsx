@@ -17,7 +17,10 @@ const Accueil = () => {
         <div className="w-full">
 
             {/* Section Hero */}
-            <div className="w-full bg-gradient-to-r from-blue-600 to-purple-600 px-10 py-12 flex items-center justify-between">
+            <div className="w-full px-10 py-12 flex items-center justify-between bg-[length:200%_200%] animate-gradient"
+                style={{
+                    backgroundImage: 'linear-gradient(120deg, #4f46e5, #7c3aed, #c026d3, #7c3aed, #4f46e5)'
+                }}>
                 
                 {/* Texte gauche */}
                 <div className="text-white">
