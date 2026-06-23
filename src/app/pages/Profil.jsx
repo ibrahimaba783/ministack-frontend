@@ -17,7 +17,6 @@ const Profil = () => {
 
         const fetchProfil = async () => {
             try {
-                // recuperer les infos de l'utilisateur connecte
                 const res = await axios.get('https://ministack-backend-stpp.onrender.com/api/auth/profil', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -30,7 +29,6 @@ const Profil = () => {
         const fetchMesQuestions = async () => {
             try {
                 const res = await axios.get('https://ministack-backend-stpp.onrender.com/api/questions');
-                // filtrer seulement les questions de cet utilisateur
                 const mesQuestions = res.data.filter(q => q.auteur?._id === JSON.parse(atob(token.split('.')[1])).id);
                 setQuestions(mesQuestions);
             } catch (error) {
@@ -42,9 +40,34 @@ const Profil = () => {
         fetchMesQuestions();
     }, []);
 
+    // gerer le changement de photo
+    const handlePhotoChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        try {
+            const res = await axios.post(
+                'https://ministack-backend-stpp.onrender.com/api/auth/photo',
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+            setUser(res.data.user); // mettre a jour avec la nouvelle photo
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de l\'upload');
+        }
+    };
+
     if (!user) return <p className="p-10">Chargement...</p>;
 
-    // recuperer les initiales pour l'avatar
     const initiales = `${user.prenom[0]}${user.nom[0]}`.toUpperCase();
 
     return (
@@ -53,10 +76,30 @@ const Profil = () => {
             {/* En-tête profil */}
             <div className="flex items-center gap-6 mb-8 border-b pb-6">
 
-                {/* Avatar cliquable */}
-                <div className="w-20 h-20 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-bold cursor-pointer">
-                    {initiales}
-                </div>
+                {/* Avatar avec upload */}
+                <label className="relative cursor-pointer group">
+                    {user.photo ? (
+                        <img
+                            src={`https://ministack-backend-stpp.onrender.com${user.photo}`}
+                            alt="profil"
+                            className="w-20 h-20 rounded-full object-cover" />
+                    ) : (
+                        <div className="w-20 h-20 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-bold">
+                            {initiales}
+                        </div>
+                    )}
+                    
+                    {/* overlay au survol */}
+                    <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-white text-xs font-semibold">Changer</span>
+                    </div>
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoChange} />
+                </label>
 
                 <div>
                     <h1 className="text-2xl font-bold">{user.prenom} {user.nom}</h1>
