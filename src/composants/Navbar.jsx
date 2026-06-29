@@ -22,6 +22,10 @@ const Navbar = () => {
     };
 
     fetchProfil();
+
+    // rafraichir quand le profil est modifie ailleurs (page Profil)
+    window.addEventListener('profilMisAJour', fetchProfil);
+    return () => window.removeEventListener('profilMisAJour', fetchProfil);
   }, [token]);
 
   const Deconnexion = () => {

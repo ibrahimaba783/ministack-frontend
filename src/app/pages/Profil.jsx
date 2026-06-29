@@ -76,6 +76,7 @@ const Profil = () => {
             );
             setUser(res.data.user);
             setMenuOuvert(false);
+            window.dispatchEvent(new Event('profilMisAJour')); // notifier la Navbar
         } catch (error) {
             console.log(error);
             alert('Erreur lors de l\'upload');
@@ -91,6 +92,7 @@ const Profil = () => {
             );
             setUser(res.data.user);
             setMenuOuvert(false);
+            window.dispatchEvent(new Event('profilMisAJour')); // notifier la Navbar
         } catch (error) {
             console.log(error);
             alert('Erreur lors de la suppression');
@@ -111,6 +113,9 @@ const Profil = () => {
             // on met aussi a jour le localStorage pour que la Navbar reste a jour
             const userLocal = JSON.parse(localStorage.getItem("user"));
             localStorage.setItem("user", JSON.stringify({ ...userLocal, prenom, nom, email }));
+
+            // prevenir les autres composants (Navbar) que le profil a change
+            window.dispatchEvent(new Event('profilMisAJour'));
 
             setModeEditionProfil(false);
             alert('Profil mis à jour !');
