@@ -9,7 +9,7 @@ const Footer = () => {
           
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="font-bold text-white text-sm">LOGO</span>
+                <img src="/image.png" alt="MiniStack" className="h-8" />
             </div>
             <ul className="flex flex-col gap-2 text-sm">
               <li><span className="hover:text-white cursor-pointer">Questions</span></li>

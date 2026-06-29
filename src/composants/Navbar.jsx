@@ -15,7 +15,7 @@ const Navbar = () => {
       
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="MiniStack" className="h-8" />
+          <img src="/image.png" alt="MiniStack" className="h-8" />
       </Link>
 
       {/* Liens navigation */}
