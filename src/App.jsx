@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Profil from './app/pages/Profil';
 import DetailQuestion from './app/pages/DetailQuestion';
 import QuestionForm from './app/pages/QuestionForm';
+import ModifierQuestion from './app/pages/ModifierQuestion';
 
 
 const App = () => {
@@ -21,8 +22,9 @@ const App = () => {
                 { path: '/inscription', element: <Inscription /> },
                 { path: '/profil', element: <Profil /> },
                 { path: '/detail/:id', element: <DetailQuestion /> },
-                //  route de creer question
                  {path:'/ajouter_question' , element:<QuestionForm/>},
+                 { path: '/modifier_question/:id', element: <ModifierQuestion /> },
+                 
             ]
         }
 

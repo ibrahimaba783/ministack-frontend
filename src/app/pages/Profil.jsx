@@ -7,6 +7,8 @@ const Profil = () => {
     const token = localStorage.getItem("token");
     const [user, setUser] = useState(null);
     const [questions, setQuestions] = useState([]);
+    const [menuOuvert, setMenuOuvert] = useState(false);
+    const [menuQuestionOuvert, setMenuQuestionOuvert] = useState(null); // id de la question dont le menu est ouvert
 
     useEffect(() => {
         if (!token) {
@@ -40,7 +42,6 @@ const Profil = () => {
         fetchMesQuestions();
     }, []);
 
-    // gerer le changement de photo
     const handlePhotoChange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -59,10 +60,41 @@ const Profil = () => {
                     }
                 }
             );
-            setUser(res.data.user); // mettre a jour avec la nouvelle photo
+            setUser(res.data.user);
+            setMenuOuvert(false);
         } catch (error) {
             console.log(error);
             alert('Erreur lors de l\'upload');
+        }
+    };
+
+    const supprimerPhoto = async () => {
+        try {
+            const res = await axios.put(
+                'https://ministack-backend-stpp.onrender.com/api/auth/photo/supprimer',
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setUser(res.data.user);
+            setMenuOuvert(false);
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la suppression');
+        }
+    };
+
+    // supprimer une question
+    const supprimerQuestion = async (id) => {
+        if (!window.confirm('Voulez-vous vraiment supprimer cette question ?')) return;
+        try {
+            await axios.delete(`https://ministack-backend-stpp.onrender.com/api/questions/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setQuestions(questions.filter(q => q._id !== id)); // retirer de la liste
+            setMenuQuestionOuvert(null);
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la suppression');
         }
     };
 
@@ -74,32 +106,45 @@ const Profil = () => {
         <div className="w-full p-10 max-w-3xl mx-auto">
 
             {/* En-tête profil */}
-            <div className="flex items-center gap-6 mb-8 border-b pb-6">
+            <div className="flex items-center gap-6 mb-8 border-b pb-6 relative">
 
-                {/* Avatar avec upload */}
-                <label className="relative cursor-pointer group">
-                    {user.photo ? (
-                        <img
-                            src={`https://ministack-backend-stpp.onrender.com${user.photo}`}
-                            alt="profil"
-                            className="w-20 h-20 rounded-full object-cover" />
-                    ) : (
-                        <div className="w-20 h-20 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-bold">
-                            {initiales}
-                        </div>
-                    )}
-                    
-                    {/* overlay au survol */}
-                    <div className="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-white text-xs font-semibold">Changer</span>
+                <div className="relative">
+                    <button onClick={() => setMenuOuvert(!menuOuvert)} className="relative">
+                        {user.photo ? (
+                            <img
+                                src={user.photo}
+                                alt="profil"
+                                className="w-20 h-20 rounded-full object-cover hover:opacity-80" />
+                        ) : (
+                            <div className="w-20 h-20 rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-bold hover:opacity-80">
+                                {initiales}
+                            </div>
+                        )}
+                    </button>
+
+                    {menuOuvert && (
+                    <div className="absolute top-24 left-0 bg-white border rounded-lg shadow-lg w-48 z-10 overflow-hidden">
+                        <label className="block px-4 py-3 hover:bg-gray-100 cursor-pointer text-sm font-medium border-b">
+                            📷 {user.photo ? "Changer la photo" : "Ajouter une photo"}
+                            <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+                        </label>
+
+                        {user.photo && (
+                            <button
+                                onClick={supprimerPhoto}
+                                className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 text-sm font-medium">
+                                🗑️ Supprimer la photo
+                            </button>
+                        )}
+
+                        <button
+                            onClick={() => setMenuOuvert(false)}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-100 text-gray-400 text-sm">
+                            Annuler
+                        </button>
                     </div>
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhotoChange} />
-                </label>
+                )}
+                </div>
 
                 <div>
                     <h1 className="text-2xl font-bold">{user.prenom} {user.nom}</h1>
@@ -112,7 +157,15 @@ const Profil = () => {
             </div>
 
             {/* Mes questions */}
-            <h2 className="text-xl font-bold mb-4">Mes questions ({questions.length})</h2>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Mes questions ({questions.length})</h2>
+                <button
+                    onClick={() => navigate('/ajouter_question')}
+                    className="bg-purple-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-purple-700">
+                    + Ajouter une question
+                </button>
+            </div>
+
             <div className="flex flex-col gap-4">
                 {questions.length === 0 ? (
                     <p className="text-gray-400">Vous n'avez posé aucune question.</p>
@@ -120,14 +173,54 @@ const Profil = () => {
                     questions.map((question) => (
                         <div
                             key={question._id}
-                            onClick={() => navigate(`/detail/${question._id}`)}
-                            className="border rounded-lg p-4 shadow cursor-pointer hover:border-purple-400">
-                            <h3 className="font-semibold text-blue-600">{question.titre}</h3>
-                            <p className="text-gray-600 text-sm mt-1">{question.description}</p>
-                            <div className="flex justify-between mt-2 text-xs text-gray-400">
-                                <span>{question.votes || 0} votes</span>
-                                <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+                            className="border rounded-lg p-4 shadow relative hover:border-purple-400">
+
+                            <div className="flex justify-between items-start">
+                                <div
+                                    onClick={() => navigate(`/detail/${question._id}`)}
+                                    className="flex-1 cursor-pointer">
+                                    <h3 className="font-semibold text-blue-600">{question.titre}</h3>
+                                    <p className="text-gray-600 text-sm mt-1">{question.description}</p>
+                                    <div className="flex justify-between mt-2 text-xs text-gray-400">
+                                        <span>{question.votes || 0} votes</span>
+                                        <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+
+                                {/* menu trois points */}
+                                <div className="relative">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setMenuQuestionOuvert(menuQuestionOuvert === question._id ? null : question._id);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-700 px-2">
+                                        ⋮
+                                    </button>
+
+                                    {menuQuestionOuvert === question._id && (
+                                        <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg w-44 z-10 overflow-hidden">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/modifier_question/${question._id}`);
+                                                }}
+                                                className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm font-medium border-b">
+                                                ✏️ Modifier
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    supprimerQuestion(question._id);
+                                                }}
+                                                className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 text-sm font-medium">
+                                                🗑️ Supprimer
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
                         </div>
                     ))
                 )}

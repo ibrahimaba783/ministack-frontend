@@ -4,6 +4,7 @@ import Questions from './../../composants/Questions';
 
 const Accueil = () => {
     const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
     const navigate = useNavigate();
 
     const VerificationToken = () => {
@@ -25,7 +26,10 @@ const Accueil = () => {
                 {/* Texte gauche */}
                 <div className="text-white">
                     <h1 className="text-4xl font-bold mb-3">
-                        Bienvenue sur <span className="text-yellow-400">MiniStack</span> 
+                        {token && user
+                            ? <>Salut <span className="text-yellow-400">{user.prenom} {user.nom}</span>, qu'est-ce que tu veux apprendre aujourd'hui ?</>
+                            : <>Bienvenue sur <span className="text-yellow-400">MiniStack</span></>
+                        }
                     </h1>
                     <p className="text-blue-100 text-lg max-w-md">
                         Posez vos questions, partagez vos connaissances et progressez avec la communauté des développeurs.

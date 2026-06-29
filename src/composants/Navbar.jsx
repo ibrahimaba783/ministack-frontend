@@ -15,7 +15,7 @@ const Navbar = () => {
       
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2">
-        <span className="font-bold text-gray-800 text-lg">LOGO</span>
+          <img src="/logo.png" alt="MiniStack" className="h-8" />
       </Link>
 
       {/* Liens navigation */}

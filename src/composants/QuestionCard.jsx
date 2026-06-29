@@ -23,6 +23,12 @@ const QuestionCard = ({ question }) => {
                     <span>réponses</span>
                 </div>
 
+                {/* nombre de vues */}
+                <div className="flex flex-col items-center">
+                    <span className="font-bold text-gray-700">{question.vues || 0}</span>
+                    <span>vues</span>
+                </div>
+
             </div>
 
             {/* Contenu droite */}

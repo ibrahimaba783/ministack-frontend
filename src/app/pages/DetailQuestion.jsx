@@ -1,21 +1,31 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const DetailQuestion = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
     const [question, setQuestion] = useState(null);
     const [reponses, setReponses] = useState([]);
     const [contenu, setContenu] = useState('');
     const [votes, setVotes] = useState(0); // votes locaux
+    const [modeEdition, setModeEdition] = useState(false);
+    const [titre, setTitre] = useState('');
+    const [description, setDescription] = useState('');
+    const [tags, setTags] = useState('');
 
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
                 const res = await axios.get(`https://ministack-backend-stpp.onrender.com/api/questions/${id}`);
                 setQuestion(res.data);
-                setVotes(res.data.votes || 0); // initialiser les votes
+                // initialiser les votes
+                setVotes(res.data.votes || 0); 
+                setTitre(res.data.titre);
+                setDescription(res.data.description);
+                setTags(res.data.tags?.join(', ') || '');
 
                 const rep = await axios.get(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`);
                 setReponses(rep.data);
@@ -58,7 +68,41 @@ const DetailQuestion = () => {
         }
     };
 
+    const handleModifier = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(
+                `https://ministack-backend-stpp.onrender.com/api/questions/${id}`,
+                { titre, description, tags: tags.split(',').map(t => t.trim()) },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setQuestion(res.data.question);
+            setModeEdition(false);
+            alert('Question modifiée !');
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la modification');
+        }
+    };
+
+    const handleSupprimer = async () => {
+        if (!window.confirm('Voulez-vous vraiment supprimer cette question ?')) return;
+        try {
+            await axios.delete(
+                `https://ministack-backend-stpp.onrender.com/api/questions/${id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            alert('Question supprimée !');
+            navigate('/');
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la suppression');
+        }
+    };
+
     if (!question) return <p className="p-10">Chargement...</p>;
+
+    const estAuteur = user && question.auteur && user.id === question.auteur._id;
 
     return (
         <div className="w-full p-10">
@@ -80,19 +124,65 @@ const DetailQuestion = () => {
 
                 {/* contenu question */}
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold mb-2">{question.titre}</h1>
-                    <p className="text-gray-600 mb-4">{question.description}</p>
-                    <div className="flex gap-2">
-                        {question.tags?.map((tag, i) => (
-                            <span key={i} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
+
+                    {modeEdition ? (
+                        <form onSubmit={handleModifier} className="flex flex-col gap-3">
+                            <input
+                                className="border py-2 px-3 border-black rounded"
+                                value={titre}
+                                onChange={(e) => setTitre(e.target.value)} />
+                            <textarea
+                                className="border py-2 px-3 border-black rounded h-24"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)} />
+                            <input
+                                className="border py-2 px-3 border-black rounded"
+                                placeholder="Tags séparés par des virgules"
+                                value={tags}
+                                onChange={(e) => setTags(e.target.value)} />
+                            <div className="flex gap-2">
+                                <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded font-bold hover:bg-blue-600">
+                                    Enregistrer
+                                </button>
+                                <button type="button" onClick={() => setModeEdition(false)} className="bg-gray-300 py-2 px-4 rounded font-bold hover:bg-gray-400">
+                                    Annuler
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <>
+                            <h1 className="text-2xl font-bold mb-2">{question.titre}</h1>
+                            <p className="text-gray-600 mb-4">{question.description}</p>
+                            <div className="flex gap-2">
+                                {question.tags?.map((tag, i) => (
+                                    <span key={i} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
                     <div className="flex justify-between mt-4 text-sm text-gray-500">
                         <span>{question.auteur?.prenom} {question.auteur?.nom}</span>
-                        <span>{new Date(question.createdAt).toLocaleDateString()}</span>
+                        <span>{question.vues || 0} vues · {new Date(question.createdAt).toLocaleDateString()}</span>
                     </div>
+
+                    {/* boutons modifier/supprimer, visibles seulement pour l'auteur */}
+                    {estAuteur && !modeEdition && (
+                        <div className="flex gap-3 mt-3">
+                            <button
+                                onClick={() => setModeEdition(true)}
+                                className="text-blue-600 text-sm font-semibold hover:underline">
+                                Modifier
+                            </button>
+                            <button
+                                onClick={handleSupprimer}
+                                className="text-red-600 text-sm font-semibold hover:underline">
+                                Supprimer
+                            </button>
+                        </div>
+                    )}
                 </div>
 
             </div>
