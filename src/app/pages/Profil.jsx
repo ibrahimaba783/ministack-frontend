@@ -10,6 +10,17 @@ const Profil = () => {
     const [menuOuvert, setMenuOuvert] = useState(false);
     const [menuQuestionOuvert, setMenuQuestionOuvert] = useState(null); // id de la question dont le menu est ouvert
 
+    // edition des infos du profil
+    const [modeEditionProfil, setModeEditionProfil] = useState(false);
+    const [prenom, setPrenom] = useState('');
+    const [nom, setNom] = useState('');
+    const [email, setEmail] = useState('');
+
+    // changement de mot de passe
+    const [modeMotDePasse, setModeMotDePasse] = useState(false);
+    const [ancienMotDePasse, setAncienMotDePasse] = useState('');
+    const [nouveauMotDePasse, setNouveauMotDePasse] = useState('');
+
     useEffect(() => {
         if (!token) {
             alert('Accès refusé. Veuillez vous connecter.');
@@ -23,6 +34,9 @@ const Profil = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setUser(res.data);
+                setPrenom(res.data.prenom);
+                setNom(res.data.nom);
+                setEmail(res.data.email);
             } catch (error) {
                 console.log(error);
             }
@@ -83,6 +97,48 @@ const Profil = () => {
         }
     };
 
+    // modifier les infos du profil
+    const handleModifierProfil = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(
+                'https://ministack-backend-stpp.onrender.com/api/auth/profil',
+                { prenom, nom, email },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setUser(res.data.user);
+
+            // on met aussi a jour le localStorage pour que la Navbar reste a jour
+            const userLocal = JSON.parse(localStorage.getItem("user"));
+            localStorage.setItem("user", JSON.stringify({ ...userLocal, prenom, nom, email }));
+
+            setModeEditionProfil(false);
+            alert('Profil mis à jour !');
+        } catch (error) {
+            console.log(error);
+            alert(error.response?.data?.message || 'Erreur lors de la mise à jour');
+        }
+    };
+
+    // changer le mot de passe
+    const handleChangerMotDePasse = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.put(
+                'https://ministack-backend-stpp.onrender.com/api/auth/mot-de-passe',
+                { ancienMotDePasse, nouveauMotDePasse },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setAncienMotDePasse('');
+            setNouveauMotDePasse('');
+            setModeMotDePasse(false);
+            alert('Mot de passe modifié avec succès !');
+        } catch (error) {
+            console.log(error);
+            alert(error.response?.data?.message || 'Erreur lors du changement de mot de passe');
+        }
+    };
+
     // supprimer une question
     const supprimerQuestion = async (id) => {
         if (!window.confirm('Voulez-vous vraiment supprimer cette question ?')) return;
@@ -106,7 +162,7 @@ const Profil = () => {
         <div className="w-full p-10 max-w-3xl mx-auto">
 
             {/* En-tête profil */}
-            <div className="flex items-center gap-6 mb-8 border-b pb-6 relative">
+            <div className="flex items-center gap-6 mb-4 relative">
 
                 <div className="relative">
                     <button onClick={() => setMenuOuvert(!menuOuvert)} className="relative">
@@ -146,15 +202,86 @@ const Profil = () => {
                 )}
                 </div>
 
-                <div>
-                    <h1 className="text-2xl font-bold">{user.prenom} {user.nom}</h1>
-                    <p className="text-gray-500">{user.email}</p>
-                    <p className="text-gray-400 text-sm mt-1">
-                        Membre depuis le {new Date(user.createdAt).toLocaleDateString()}
-                    </p>
-                </div>
+                {!modeEditionProfil && (
+                    <div>
+                        <h1 className="text-2xl font-bold">{user.prenom} {user.nom}</h1>
+                        <p className="text-gray-500">{user.email}</p>
+                        <p className="text-gray-400 text-sm mt-1">
+                            Membre depuis le {new Date(user.createdAt).toLocaleDateString()}
+                        </p>
+                    </div>
+                )}
 
             </div>
+
+            {/* formulaire d'edition du profil */}
+            {modeEditionProfil ? (
+                <form onSubmit={handleModifierProfil} className="flex flex-col gap-3 mb-6 max-w-md">
+                    <input
+                        className="border py-2 px-3 border-gray-300 rounded"
+                        placeholder="Prénom"
+                        value={prenom}
+                        onChange={(e) => setPrenom(e.target.value)} />
+                    <input
+                        className="border py-2 px-3 border-gray-300 rounded"
+                        placeholder="Nom"
+                        value={nom}
+                        onChange={(e) => setNom(e.target.value)} />
+                    <input
+                        className="border py-2 px-3 border-gray-300 rounded"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)} />
+                    <div className="flex gap-2">
+                        <button type="submit" className="bg-purple-600 text-white py-2 px-4 rounded font-bold hover:bg-purple-700">
+                            Enregistrer
+                        </button>
+                        <button type="button" onClick={() => setModeEditionProfil(false)} className="bg-gray-200 py-2 px-4 rounded font-bold hover:bg-gray-300">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <div className="flex gap-4 mb-6 pb-6 border-b">
+                    <button
+                        onClick={() => setModeEditionProfil(true)}
+                        className="text-purple-600 text-sm font-semibold hover:underline">
+                        ✏️ Modifier mes informations
+                    </button>
+                    <button
+                        onClick={() => setModeMotDePasse(!modeMotDePasse)}
+                        className="text-purple-600 text-sm font-semibold hover:underline">
+                        🔒 Changer le mot de passe
+                    </button>
+                </div>
+            )}
+
+            {/* formulaire de changement de mot de passe */}
+            {modeMotDePasse && !modeEditionProfil && (
+                <form onSubmit={handleChangerMotDePasse} className="flex flex-col gap-3 mb-6 max-w-md pb-6 border-b">
+                    <input
+                        className="border py-2 px-3 border-gray-300 rounded"
+                        type="password"
+                        placeholder="Ancien mot de passe"
+                        value={ancienMotDePasse}
+                        onChange={(e) => setAncienMotDePasse(e.target.value)} />
+                    <input
+                        className="border py-2 px-3 border-gray-300 rounded"
+                        type="password"
+                        placeholder="Nouveau mot de passe"
+                        value={nouveauMotDePasse}
+                        onChange={(e) => setNouveauMotDePasse(e.target.value)} />
+                    <div className="flex gap-2">
+                        <button type="submit" className="bg-purple-600 text-white py-2 px-4 rounded font-bold hover:bg-purple-700">
+                            Confirmer
+                        </button>
+                        <button type="button" onClick={() => setModeMotDePasse(false)} className="bg-gray-200 py-2 px-4 rounded font-bold hover:bg-gray-300">
+                            Annuler
+                        </button>
+                    </div>
+                </form>
+            )}
 
             {/* Mes questions */}
             <div className="flex items-center justify-between mb-4">
