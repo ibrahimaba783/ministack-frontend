@@ -7,6 +7,7 @@ const Questions = () => {
   // liste des questions
   const [questions, setQuestions] = useState([]);
   const [recherche, setRecherche] = useState('');
+  const [tri, setTri] = useState('recent'); // recent | votes | nonResolus
 
   // charger les questions depuis l'API
   useEffect(() => {
@@ -31,9 +32,34 @@ const Questions = () => {
     );
   });
 
+  // trier les questions filtrees selon le critere choisi
+  const questionsTriees = [...questionsFiltrees].sort((a, b) => {
+    if (tri === 'votes') {
+      return (b.votes || 0) - (a.votes || 0); // plus votees en premier
+    }
+    if (tri === 'nonResolus') {
+      return (a.nombreReponses || 0) - (b.nombreReponses || 0); // sans reponses en premier
+    }
+    // par defaut : plus recentes en premier
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
     <div className="w-full p-10">
-      <h1 className="text-3xl font-bold mb-6">Les questions</h1>
+
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Les questions</h1>
+
+        {/* menu de tri */}
+        <select
+          value={tri}
+          onChange={(e) => setTri(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+          <option value="recent">Plus récent</option>
+          <option value="votes">Plus votés</option>
+          <option value="nonResolus">Non résolus</option>
+        </select>
+      </div>
 
       {/* barre de recherche */}
       <input
@@ -45,10 +71,10 @@ const Questions = () => {
 
       {/* liste des questions */}
       <div className="space-y-4">
-        {questionsFiltrees.length === 0 ? (
+        {questionsTriees.length === 0 ? (
           <p className="text-gray-400 text-center py-10">Aucune question pour le moment.</p>
         ) : (
-          questionsFiltrees.map((question) => (
+          questionsTriees.map((question) => (
             <QuestionCard key={question._id} question={question} />
           ))
         )}
