@@ -10,19 +10,22 @@ const DetailQuestion = () => {
     const [question, setQuestion] = useState(null);
     const [reponses, setReponses] = useState([]);
     const [contenu, setContenu] = useState('');
-    const [votes, setVotes] = useState(0); // votes locaux
+    const [votes, setVotes] = useState(0);
     const [modeEdition, setModeEdition] = useState(false);
     const [titre, setTitre] = useState('');
     const [description, setDescription] = useState('');
     const [tags, setTags] = useState('');
+
+    // edition d'une reponse
+    const [reponseEnEdition, setReponseEnEdition] = useState(null); // id de la reponse en cours d'edition
+    const [contenuEdition, setContenuEdition] = useState('');
 
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
                 const res = await axios.get(`https://ministack-backend-stpp.onrender.com/api/questions/${id}`);
                 setQuestion(res.data);
-                // initialiser les votes
-                setVotes(res.data.votes || 0); 
+                setVotes(res.data.votes || 0);
                 setTitre(res.data.titre);
                 setDescription(res.data.description);
                 setTags(res.data.tags?.join(', ') || '');
@@ -47,7 +50,7 @@ const DetailQuestion = () => {
                 { type },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setVotes(res.data.votes); // mise a jour instantanee
+            setVotes(res.data.votes);
         } catch (error) {
             console.log(error);
         }
@@ -56,11 +59,12 @@ const DetailQuestion = () => {
     const handleReponse = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`,
+            const res = await axios.post(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`,
                 { contenu },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            alert('Réponse ajoutée !');
+            // ajouter la nouvelle reponse a la liste sans recharger
+            setReponses([...reponses, res.data.reponse]);
             setContenu('');
         } catch (error) {
             console.log(error);
@@ -100,6 +104,40 @@ const DetailQuestion = () => {
         }
     };
 
+    // modifier une reponse
+    const handleModifierReponse = async (reponseId) => {
+        try {
+            const res = await axios.put(
+                `https://ministack-backend-stpp.onrender.com/api/reponses/${reponseId}`,
+                { contenu: contenuEdition },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // mettre a jour la reponse dans la liste
+            setReponses(reponses.map(r => r._id === reponseId ? res.data.reponse : r));
+            setReponseEnEdition(null);
+            setContenuEdition('');
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la modification');
+        }
+    };
+
+    // supprimer une reponse
+    const handleSupprimerReponse = async (reponseId) => {
+        if (!window.confirm('Voulez-vous vraiment supprimer cette réponse ?')) return;
+        try {
+            await axios.delete(
+                `https://ministack-backend-stpp.onrender.com/api/reponses/${reponseId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // retirer la reponse de la liste
+            setReponses(reponses.filter(r => r._id !== reponseId));
+        } catch (error) {
+            console.log(error);
+            alert('Erreur lors de la suppression');
+        }
+    };
+
     if (!question) return <p className="p-10">Chargement...</p>;
 
     const estAuteur = user && question.auteur && user.id === question.auteur._id;
@@ -124,7 +162,6 @@ const DetailQuestion = () => {
 
                 {/* contenu question */}
                 <div className="flex-1">
-
                     {modeEdition ? (
                         <form onSubmit={handleModifier} className="flex flex-col gap-3">
                             <input
@@ -168,7 +205,6 @@ const DetailQuestion = () => {
                         <span>{question.vues || 0} vues · {new Date(question.createdAt).toLocaleDateString()}</span>
                     </div>
 
-                    {/* boutons modifier/supprimer, visibles seulement pour l'auteur */}
                     {estAuteur && !modeEdition && (
                         <div className="flex gap-3 mt-3">
                             <button
@@ -184,21 +220,67 @@ const DetailQuestion = () => {
                         </div>
                     )}
                 </div>
-
             </div>
 
             {/* Reponses */}
             <h2 className="text-xl font-bold mb-4">{reponses.length} Réponses</h2>
             <div className="flex flex-col gap-4 mb-8">
-                {reponses.map((reponse) => (
-                    <div key={reponse._id} className="border rounded-lg p-4 shadow">
-                        <p className="text-gray-700">{reponse.contenu}</p>
-                        <div className="flex justify-between mt-2 text-sm text-gray-500">
-                            <span>{reponse.auteur?.prenom} {reponse.auteur?.nom}</span>
-                            <span>{new Date(reponse.createdAt).toLocaleDateString()}</span>
+                {reponses.map((reponse) => {
+                    const estAuteurReponse = user && reponse.auteur && user.id === reponse.auteur._id;
+                    return (
+                        <div key={reponse._id} className="border rounded-lg p-4 shadow">
+
+                            {/* mode edition de la reponse */}
+                            {reponseEnEdition === reponse._id ? (
+                                <div className="flex flex-col gap-2">
+                                    <textarea
+                                        className="border py-2 px-3 border-black rounded h-24"
+                                        value={contenuEdition}
+                                        onChange={(e) => setContenuEdition(e.target.value)} />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleModifierReponse(reponse._id)}
+                                            className="bg-blue-500 text-white py-1 px-3 rounded text-sm font-bold hover:bg-blue-600">
+                                            Enregistrer
+                                        </button>
+                                        <button
+                                            onClick={() => setReponseEnEdition(null)}
+                                            className="bg-gray-300 py-1 px-3 rounded text-sm font-bold hover:bg-gray-400">
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-gray-700">{reponse.contenu}</p>
+                                    <div className="flex justify-between mt-2 text-sm text-gray-500">
+                                        <span>{reponse.auteur?.prenom} {reponse.auteur?.nom}</span>
+                                        <span>{new Date(reponse.createdAt).toLocaleDateString()}</span>
+                                    </div>
+
+                                    {/* boutons modifier/supprimer visibles seulement pour l'auteur */}
+                                    {estAuteurReponse && (
+                                        <div className="flex gap-3 mt-2">
+                                            <button
+                                                onClick={() => {
+                                                    setReponseEnEdition(reponse._id);
+                                                    setContenuEdition(reponse.contenu);
+                                                }}
+                                                className="text-blue-600 text-sm font-semibold hover:underline">
+                                                Modifier
+                                            </button>
+                                            <button
+                                                onClick={() => handleSupprimerReponse(reponse._id)}
+                                                className="text-red-600 text-sm font-semibold hover:underline">
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Formulaire reponse */}
