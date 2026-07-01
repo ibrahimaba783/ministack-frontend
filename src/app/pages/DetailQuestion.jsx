@@ -225,121 +225,121 @@ const DetailQuestion = () => {
                     return (
                         <div key={reponse._id} className="border rounded-lg p-4 shadow">
 
-                            {/* contenu reponse */}
-                            {reponseEnEdition === reponse._id ? (
-                                <div className="flex flex-col gap-2">
-                                    <textarea
-                                        className="border py-2 px-3 border-black rounded h-24"
-                                        value={contenuEdition}
-                                        onChange={(e) => setContenuEdition(e.target.value)} />
-                                    <div className="flex gap-2">
-                                        <button onClick={() => handleModifierReponse(reponse._id)} className="bg-blue-500 text-white py-1 px-3 rounded text-sm font-bold hover:bg-blue-600">Enregistrer</button>
-                                        <button onClick={() => setReponseEnEdition(null)} className="bg-gray-300 py-1 px-3 rounded text-sm font-bold hover:bg-gray-400">Annuler</button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <p className="text-gray-700">{reponse.contenu}</p>
-                                    <div className="flex justify-between mt-2 text-sm text-gray-500">
-                                        <span>{reponse.auteur?.prenom} {reponse.auteur?.nom}</span>
-                                        <span>{new Date(reponse.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                    {estAuteurReponse && (
-                                        <div className="flex gap-3 mt-2">
-                                            <button
-                                                onClick={() => { setReponseEnEdition(reponse._id); setContenuEdition(reponse.contenu); }}
-                                                className="text-blue-600 text-sm font-semibold hover:underline">
-                                                Modifier
-                                            </button>
-                                            <button
-                                                onClick={() => handleSupprimerReponse(reponse._id)}
-                                                className="text-red-600 text-sm font-semibold hover:underline">
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
-                            )}
+                {/* contenu reponse */}
+                {reponseEnEdition === reponse._id ? (
+                    <div className="flex flex-col gap-2">
+                        <textarea
+                            className="border py-2 px-3 border-black rounded h-24"
+                            value={contenuEdition}
+                            onChange={(e) => setContenuEdition(e.target.value)} />
+                        <div className="flex gap-2">
+                            <button onClick={() => handleModifierReponse(reponse._id)} className="bg-blue-500 text-white py-1 px-3 rounded text-sm font-bold hover:bg-blue-600">Enregistrer</button>
+                            <button onClick={() => setReponseEnEdition(null)} className="bg-gray-300 py-1 px-3 rounded text-sm font-bold hover:bg-gray-400">Annuler</button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <p className="text-gray-700">{reponse.contenu}</p>
+                        <div className="flex justify-between mt-2 text-sm text-gray-500">
+                            <span>{reponse.auteur?.prenom} {reponse.auteur?.nom}</span>
+                            <span>{new Date(reponse.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        {estAuteurReponse && (
+                            <div className="flex gap-3 mt-2">
+                                <button
+                                    onClick={() => { setReponseEnEdition(reponse._id); setContenuEdition(reponse.contenu); }}
+                                    className="text-blue-600 text-sm font-semibold hover:underline">
+                                    Modifier
+                                </button>
+                                <button
+                                    onClick={() => handleSupprimerReponse(reponse._id)}
+                                    className="text-red-600 text-sm font-semibold hover:underline">
+                                    Supprimer
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
 
-                            {/* commentaires de cette reponse */}
-                            {commReponse.length > 0 && (
-                                <div className="mt-4 border-t pt-3 flex flex-col gap-2">
-                                    {commReponse.map((c) => {
-                                        const estAuteurComm = user && c.auteur && user.id === c.auteur._id;
-                                        return (
-                                            <div key={c._id} className="flex justify-between items-start text-sm text-gray-600 bg-gray-50 rounded px-3 py-2">
-                                                <span>
-                                                    💬 <span className="font-semibold">{c.auteur?.prenom} {c.auteur?.nom}</span> — {c.contenu}
-                                                </span>
-                                                {estAuteurComm && (
-                                                    <button
-                                                        onClick={() => handleSupprimerCommentaire(reponse._id, c._id)}
-                                                        className="text-red-400 hover:text-red-600 text-xs ml-4 shrink-0">
-                                                        Supprimer
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-
-                            {/* bouton + formulaire ajouter commentaire */}
-                            {token && (
-                                <div className="mt-3">
-                                    {formulaireCommentaire[reponse._id] ? (
-                                        <div className="flex gap-2 items-center">
-                                            <input
-                                                className="border py-1 px-2 border-gray-300 rounded text-sm flex-1"
-                                                placeholder="Ajouter un commentaire..."
-                                                value={contenuCommentaire[reponse._id] || ''}
-                                                onChange={(e) => setContenuCommentaire(prev => ({ ...prev, [reponse._id]: e.target.value }))}
-                                                onKeyDown={(e) => e.key === 'Enter' && handleAjouterCommentaire(reponse._id)}
-                                            />
-                                            <button
-                                                onClick={() => handleAjouterCommentaire(reponse._id)}
-                                                className="bg-gray-700 text-white py-1 px-3 rounded text-sm hover:bg-gray-800">
-                                                Envoyer
-                                            </button>
-                                            <button
-                                                onClick={() => setFormulaireCommentaire(prev => ({ ...prev, [reponse._id]: false }))}
-                                                className="text-gray-400 text-sm hover:text-gray-600">
-                                                Annuler
-                                            </button>
-                                        </div>
-                                    ) : (
+                {/* commentaires de cette reponse */}
+                {commReponse.length > 0 && (
+                    <div className="mt-4 border-t pt-3 flex flex-col gap-2">
+                        {commReponse.map((c) => {
+                            const estAuteurComm = user && c.auteur && user.id === c.auteur._id;
+                            return (
+                                <div key={c._id} className="flex justify-between items-start text-sm text-gray-600 bg-gray-50 rounded px-3 py-2">
+                                    <span>
+                                        💬 <span className="font-semibold">{c.auteur?.prenom} {c.auteur?.nom}</span> — {c.contenu}
+                                    </span>
+                                    {estAuteurComm && (
                                         <button
-                                            onClick={() => setFormulaireCommentaire(prev => ({ ...prev, [reponse._id]: true }))}
-                                            className="text-gray-400 text-xs hover:text-gray-600">
-                                            + Ajouter un commentaire
+                                            onClick={() => handleSupprimerCommentaire(reponse._id, c._id)}
+                                            className="text-red-400 hover:text-red-600 text-xs ml-4 shrink-0">
+                                            Supprimer
                                         </button>
                                     )}
                                 </div>
-                            )}
+                            );
+                        })}
+                    </div>
+                )}
 
-                        </div>
-                    );
-                })}
+                {/* bouton + formulaire ajouter commentaire */}
+                {token && (
+                    <div className="mt-3">
+                        {formulaireCommentaire[reponse._id] ? (
+                            <div className="flex gap-2 items-center">
+                                <input
+                                    className="border py-1 px-2 border-gray-300 rounded text-sm flex-1"
+                                    placeholder="Ajouter un commentaire..."
+                                    value={contenuCommentaire[reponse._id] || ''}
+                                    onChange={(e) => setContenuCommentaire(prev => ({ ...prev, [reponse._id]: e.target.value }))}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleAjouterCommentaire(reponse._id)}
+                                />
+                                <button
+                                    onClick={() => handleAjouterCommentaire(reponse._id)}
+                                    className="bg-gray-700 text-white py-1 px-3 rounded text-sm hover:bg-gray-800">
+                                    Envoyer
+                                </button>
+                                <button
+                                    onClick={() => setFormulaireCommentaire(prev => ({ ...prev, [reponse._id]: false }))}
+                                    className="text-gray-400 text-sm hover:text-gray-600">
+                                    Annuler
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setFormulaireCommentaire(prev => ({ ...prev, [reponse._id]: true }))}
+                                className="text-gray-400 text-xs hover:text-gray-600">
+                                + Ajouter un commentaire
+                            </button>
+                        )}
+                    </div>
+                )}
+
             </div>
+        );
+    })}
+</div>
 
-            {/* Formulaire reponse */}
-            {token && (
-                <div>
-                    <h3 className="text-lg font-bold mb-2">Votre réponse</h3>
-                    <form onSubmit={handleReponse} className="flex flex-col gap-4">
-                        <textarea
-                            className="border py-2 px-3 border-black rounded h-32"
-                            placeholder="Écrivez votre réponse..."
-                            value={contenu}
-                            onChange={(e) => setContenu(e.target.value)} />
-                        <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded font-bold hover:bg-blue-600 w-fit">
-                            Publier la réponse
-                        </button>
-                    </form>
-                </div>
-            )}
-
+    {/* Formulaire reponse */}
+    {token && (
+        <div>
+            <h3 className="text-lg font-bold mb-2">Votre réponse</h3>
+            <form onSubmit={handleReponse} className="flex flex-col gap-4">
+                <textarea
+                    className="border py-2 px-3 border-black rounded h-32"
+                    placeholder="Écrivez votre réponse..."
+                    value={contenu}
+                    onChange={(e) => setContenu(e.target.value)} />
+                <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded font-bold hover:bg-blue-600 w-fit">
+                    Publier la réponse
+                </button>
+            </form>
         </div>
+    )}
+
+</div>
     )
 }
 
