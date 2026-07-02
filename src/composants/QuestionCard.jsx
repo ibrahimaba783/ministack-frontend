@@ -5,55 +5,43 @@ const QuestionCard = ({ question }) => {
 
     return (
         <div
-            className="border rounded-lg p-4 shadow cursor-pointer flex gap-4"
+            className="border rounded-lg p-3 md:p-4 shadow cursor-pointer flex gap-3 md:gap-4"
             onClick={() => navigate(`/detail/${question._id}`)}>
 
-            {/* Stats gauche */}
-            <div className="flex flex-col items-center justify-start gap-2 min-w-[80px] text-sm text-gray-500">
-
-                {/* score simple sans boutons */}
+            {/* Stats gauche — plus compact sur mobile */}
+            <div className="flex flex-col items-center justify-start gap-2 min-w-[60px] md:min-w-[80px] text-xs md:text-sm text-gray-500">
                 <div className="flex flex-col items-center">
                     <span className="font-bold text-gray-700">{question.votes || 0}</span>
                     <span>votes</span>
                 </div>
-
-                {/* nombre de reponses */}
-                <div className={`flex flex-col items-center px-2 py-1 rounded ${question.resolu ? 'bg-green-500 text-white' : ''}`}>
+                <div className={`flex flex-col items-center px-1 py-1 rounded ${question.resolu ? 'bg-green-500 text-white' : ''}`}>
                     <span className="font-bold text-gray-700">{question.nombreReponses || 0}</span>
-                    <span>réponses</span>
+                    <span>rép.</span>
                 </div>
-
-                {/* nombre de vues */}
                 <div className="flex flex-col items-center">
                     <span className="font-bold text-gray-700">{question.vues || 0}</span>
                     <span>vues</span>
                 </div>
-
             </div>
 
             {/* Contenu droite */}
-            <div className="flex flex-col gap-2 flex-1">
-                <h2 className="text-lg font-semibold text-blue-600 hover:text-blue-800">
+            <div className="flex flex-col gap-1 md:gap-2 flex-1 min-w-0">
+                <h2 className="text-base md:text-lg font-semibold text-blue-600 hover:text-blue-800 leading-tight">
                     {question.titre}
                 </h2>
-                <p className="text-gray-600 text-sm">{question.description}</p>
-
-                {/* tags */}
-                <div className="flex gap-2 flex-wrap">
+                <p className="text-gray-600 text-xs md:text-sm line-clamp-2">{question.description}</p>
+                <div className="flex gap-1 md:gap-2 flex-wrap">
                     {question.tags?.map((tag, i) => (
-                        <span key={i} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
+                        <span key={i} className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded">
                             {tag}
                         </span>
                     ))}
                 </div>
-
-                {/* auteur + date */}
-                <div className="flex justify-between mt-2 text-xs text-gray-400">
+                <div className="flex justify-between mt-1 text-xs text-gray-400">
                     <span>{question.auteur?.prenom} {question.auteur?.nom}</span>
                     <span>{new Date(question.createdAt).toLocaleDateString()}</span>
                 </div>
             </div>
-
         </div>
     );
 };
