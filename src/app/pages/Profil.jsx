@@ -184,7 +184,11 @@ const Profil = () => {
                     </button>
 
                     {menuOuvert && (
-                    <div className="absolute top-24 left-0 bg-white border rounded-lg shadow-lg w-48 z-10 overflow-hidden">
+                    <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2
+             w-8 h-8 rounded-full bg-teal-600
+             origin-center
+             transition-transform duration-500
+             group-hover:scale-[26]">
                         <label className="block px-4 py-3 hover:bg-gray-100 cursor-pointer text-sm font-medium border-b">
                             📷 {user.photo ? "Changer la photo" : "Ajouter une photo"}
                             <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
