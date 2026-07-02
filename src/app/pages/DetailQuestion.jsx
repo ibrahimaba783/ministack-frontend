@@ -28,8 +28,10 @@ const DetailQuestion = () => {
     useEffect(() => {
         const fetchQuestion = async () => {
             try {
-                const res = await axios.get(`https://ministack-backend-stpp.onrender.com/api/questions/${id}`);
-                setQuestion(res.data);
+                const res = await axios.get(
+                    `https://ministack-backend-stpp.onrender.com/api/questions/${id}`,
+                    token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+                );
                 setVotes(res.data.votes || 0);
                 setTitre(res.data.titre);
                 setDescription(res.data.description);
