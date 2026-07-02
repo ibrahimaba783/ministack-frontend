@@ -34,7 +34,7 @@ const QuestionForm = () => {
     };
 
     return (
-        <div className="w-full p-10">
+        <div className="w-full px-4 md:px-10 py-6 md:py-10 max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold mb-6">Poser une question</h1>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">

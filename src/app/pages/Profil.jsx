@@ -299,65 +299,78 @@ const Profil = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-                {questions.length === 0 ? (
-                    <p className="text-gray-400">Vous n'avez posé aucune question.</p>
-                ) : (
-                    questions.map((question) => (
-                        <div
-                            key={question._id}
-                            className="border rounded-lg p-4 shadow relative hover:border-purple-400">
+    {questions.length === 0 ? (
+        <p className="text-gray-400">Vous n'avez posé aucune question.</p>
+    ) : (
+        questions.map((question) => (
+            <div
+                key={question._id}
+                className="group relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-teal-600"
+            >
+                {/* cercle animé */}
+                <div className="absolute -top-5 -right-5 h-10 w-10 rounded-full bg-teal-600 transition-all duration-500 ease-out group-hover:scale-[22]"></div>
 
-                            <div className="flex justify-between items-start">
-                                <div
-                                    onClick={() => navigate(`/detail/${question._id}`)}
-                                    className="flex-1 cursor-pointer">
-                                    <h3 className="font-semibold text-blue-600">{question.titre}</h3>
-                                    <p className="text-gray-600 text-sm mt-1">{question.description}</p>
-                                    <div className="flex justify-between mt-2 text-xs text-gray-400">
-                                        <span>{question.votes || 0} votes</span>
-                                        <span>{new Date(question.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
+                <div className="relative z-10 flex justify-between items-start p-5">
 
-                                {/* menu trois points */}
-                                <div className="relative">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setMenuQuestionOuvert(menuQuestionOuvert === question._id ? null : question._id);
-                                        }}
-                                        className="text-gray-400 hover:text-gray-700 px-2">
-                                        ⋮
-                                    </button>
+                    {/* contenu */}
+                    <div
+                        onClick={() => navigate(`/detail/${question._id}`)}
+                        className="flex-1 cursor-pointer"
+                    >
+                        <h3 className="font-bold text-lg text-blue-600 transition-colors duration-300 group-hover:text-white">
+                            {question.titre}
+                        </h3>
 
-                                    {menuQuestionOuvert === question._id && (
-                                        <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg w-44 z-10 overflow-hidden">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigate(`/modifier_question/${question._id}`);
-                                                }}
-                                                className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm font-medium border-b">
-                                                ✏️ Modifier
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    supprimerQuestion(question._id);
-                                                }}
-                                                className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 text-sm font-medium">
-                                                🗑️ Supprimer
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                        <p className="text-gray-600 text-sm mt-2 transition-colors duration-300 group-hover:text-white/90">
+                            {question.description}
+                        </p>
 
+                        <div className="flex justify-between mt-4 text-xs text-gray-400 transition-colors duration-300 group-hover:text-white/80">
+                            <span>{question.votes || 0} votes</span>
+                            <span>{new Date(question.createdAt).toLocaleDateString()}</span>
                         </div>
-                    ))
-                )}
-            </div>
+                    </div>
 
+                    {/* menu 3 points */}
+                    <div className="relative z-20">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuQuestionOuvert(menuQuestionOuvert === question._id ? null : question._id);
+                            }}
+                            className="text-gray-400 transition-colors duration-300 hover:text-white group-hover:text-white px-2"
+                        >
+                            ⋮
+                        </button>
+
+                        {menuQuestionOuvert === question._id && (
+                            <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg w-44 z-10 overflow-hidden">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/modifier_question/${question._id}`);
+                                    }}
+                                    className="w-full text-left px-4 py-3 hover:bg-gray-100 text-sm font-medium border-b">
+                                    ✏️ Modifier
+                                </button>
+
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        supprimerQuestion(question._id);
+                                    }}
+                                    className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 text-sm font-medium">
+                                    🗑️ Supprimer
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+            </div>
+        ))
+    )}
+</div>
         </div>
     )
 }

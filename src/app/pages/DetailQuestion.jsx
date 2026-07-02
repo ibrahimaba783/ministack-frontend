@@ -29,14 +29,19 @@ const DetailQuestion = () => {
         const fetchQuestion = async () => {
             try {
                 const res = await axios.get(
-                    `https://ministack-backend-stpp.onrender.com/api/questions/${id}`,
-                    token ? { headers: { Authorization: `Bearer ${token}` } } : {}
-                );
-                setVotes(res.data.votes || 0);
-                setTitre(res.data.titre);
-                setDescription(res.data.description);
-                setTags(res.data.tags?.join(', ') || '');
+                `https://ministack-backend-stpp.onrender.com/api/questions/${id}`,
+                token
+                    ? { headers: { Authorization: `Bearer ${token}` } }
+                    : {}
+            );
 
+                // ✅ Mettre la question dans le state
+                setQuestion(res.data);
+
+                setVotes(res.data.votes || 0);
+                setTitre(res.data.titre || '');
+                setDescription(res.data.description || '');
+                setTags(res.data.tags?.join(', ') || '');
                 const rep = await axios.get(`https://ministack-backend-stpp.onrender.com/api/reponses/${id}`);
                 setReponses(rep.data);
 
