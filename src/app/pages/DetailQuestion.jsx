@@ -63,16 +63,21 @@ const DetailQuestion = () => {
     }, [id]);
 
     const voter = async (type) => {
-        if (!token) { alert('Veuillez vous connecter pour voter'); return; }
-        try {
-            const res = await axios.put(
-                `https://ministack-backend-stpp.onrender.com/api/questions/${id}/voter`,
-                { type },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setVotes(res.data.votes);
-        } catch (error) { console.log(error); }
-    };
+    if (!token) { alert('Veuillez vous connecter pour voter'); return; }
+    try {
+        const res = await axios.put(
+            `https://ministack-backend-stpp.onrender.com/api/questions/${id}/voter`,
+            { type },
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setVotes(res.data.votes);
+    } catch (error) {
+        if (error.response?.status === 400) {
+            alert(error.response.data.message); // "Vous avez déjà voté"
+        }
+        console.log(error);
+    }
+};
 
     const handleReponse = async (e) => {
         e.preventDefault();
